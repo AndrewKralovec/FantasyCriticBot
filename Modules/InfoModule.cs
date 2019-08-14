@@ -20,7 +20,7 @@ namespace FantasyBot
         public async Task WebAsync(string echo)
         {
             var data = await _client.GetProductAsync();
-            await ReplyAsync("");
+            await ReplyAsync(data);
         }
     }
 }

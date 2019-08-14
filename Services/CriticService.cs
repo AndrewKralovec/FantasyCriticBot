@@ -24,9 +24,16 @@ namespace FantasyBot
         // This method uses the shared instance of HttpClient for every call to GetProductAsync.
         public async Task<string> GetProductAsync()
         {
-            var hostName = _remoteServiceBaseUrl;
-            var result = await _httpClient.GetStringAsync(_remoteServiceBaseUrl);
-            return "";
+            try
+            {
+                var result = await _httpClient.GetStringAsync(_remoteServiceBaseUrl);
+                return result;
+            }
+            catch (HttpRequestException)
+            {
+
+                return $"Sorry, had problem accessing [{_remoteServiceBaseUrl}]";
+            }
         }
 
     }
