@@ -41,6 +41,26 @@
       "frameworks": {
         "netcoreapp2.1": {
           "dependencies": {
+            "Discord.Net": {
+              "target": "Package",
+              "version": "(, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.Extensions.Configuration.FileExtensions": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.Extensions.Configuration.UserSecrets": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
             "Microsoft.NETCore.App": {
               "target": "Package",
               "version": "[2.1.0, )",
