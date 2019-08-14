@@ -82,6 +82,7 @@ namespace FantasyBot
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
+                .AddSingleton<CriticService>()
                 .BuildServiceProvider();
         }
 
