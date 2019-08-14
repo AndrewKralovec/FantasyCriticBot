@@ -1,65 +1,85 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
+using Microsoft.Extensions.Configuration;
 
 namespace FantasyBot
 {
-public class CommandHandler
+    public class CommandHandler
     {
-        private readonly DiscordSocketClient _client;
+        // Setup fields to be set later in the constructor
+        private readonly IConfigurationRoot _config;
         private readonly CommandService _commands;
+        private readonly DiscordSocketClient _client;
+        private readonly IServiceProvider _services;
+        private readonly string _prefix;
 
-        // Retrieve client and CommandService instance via ctor
-        public CommandHandler(DiscordSocketClient client, CommandService commands)
+        public CommandHandler(IServiceProvider services)
         {
-            _commands = commands;
-            _client = client;
+            // Define services
+            _config = services.GetRequiredService<IConfigurationRoot>();
+            _commands = services.GetRequiredService<CommandService>();
+            _client = services.GetRequiredService<DiscordSocketClient>();
+            _services = services;
+            _prefix = _config["Bot:Prefix"];
+
+            if (string.IsNullOrWhiteSpace(_prefix))
+                throw new Exception("Bot:Prefix missing from -> [appsettings.json]");
+
+            // Handle closing action.
+            _commands.CommandExecuted += CommandExecutedAsync;
+
+            // Handle message action, prevent bad commands.
+            _client.MessageReceived += MessageReceivedAsync;
+
         }
 
-        public async Task InstallCommandsAsync()
+        public async Task InitializeAsync() 
+            => await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+
+        public async Task MessageReceivedAsync(SocketMessage rawMessage)
         {
-            // Hook the MessageReceived event into our command handler
-            _client.MessageReceived += HandleCommandAsync;
-
-            // Here we discover all of the command modules in the entry 
-            // assembly and load them. Starting from Discord.NET 2.0, a
-            // service provider is required to be passed into the
-            // module registration method to inject the 
-            // required dependencies.
-            //
-            // If you do not use Dependency Injection, pass null.
-            // See Dependency Injection guide for more information.
-            await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
-                                            services: null);
-        }
-
-        private async Task HandleCommandAsync(SocketMessage messageParam)
-        {
-            // Don't process the command if it was a system message
-            var message = messageParam as SocketUserMessage;
-            if (message == null) return;
-
-            // Create a number to track where the prefix ends and the command begins
-            int argPos = 0;
-
-            // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-            if (!(message.HasCharPrefix('!', ref argPos) ||
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos)) ||
-                message.Author.IsBot)
+            // Don't process system/other bot messages
+            if (!(rawMessage is SocketUserMessage message))
                 return;
 
-            // Create a WebSocket-based command context based on the message
+            if (message.Source != MessageSource.User)
+                return;
+
+            var argPos = 0;
+            var prefix = Char.Parse(_prefix);
+
+            // Check if valid context
+            if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasCharPrefix(prefix, ref argPos)))
+                return;
+
             var context = new SocketCommandContext(_client, message);
 
-            // Execute the command with the command context we just
-            // created, along with the service provider for precondition checks.
-            await _commands.ExecuteAsync(
-                context: context,
-                argPos: argPos,
-                services: null);
+            // Execute command
+            await _commands.ExecuteAsync(context, argPos, _services);
+        }
+
+        public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        {
+            // Command not found
+            if (!command.IsSpecified)
+            {
+                System.Console.WriteLine($"Command failed to execute for [{context.User.Username}] -> [{result.ErrorReason}]!");
+                return;
+            }
+            // Command Success
+            if (result.IsSuccess)
+            {
+                System.Console.WriteLine($"Command [{command.Value.Name}] executed for -> [{context.User.Username}]");
+                return;
+            }
+
+            // Error 
+            await context.Channel.SendMessageAsync($"Sorry, {context.User.Username}... something went wrong -> [{result}]!");
         }
     }
 }
