@@ -11,7 +11,6 @@ namespace FantasyBot
 {
     public class CommandHandler
     {
-        // Setup fields to be set later in the constructor
         private readonly IConfigurationRoot _config;
         private readonly CommandService _commands;
         private readonly DiscordSocketClient _client;
@@ -51,15 +50,14 @@ namespace FantasyBot
                 return;
 
             var argPos = 0;
-            var prefix = Char.Parse(_prefix);
+            var prefix = char.Parse(_prefix);
 
             // Check if valid context
             if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasCharPrefix(prefix, ref argPos)))
                 return;
 
-            var context = new SocketCommandContext(_client, message);
-
             // Execute command
+            var context = new SocketCommandContext(_client, message);
             await _commands.ExecuteAsync(context, argPos, _services);
         }
 

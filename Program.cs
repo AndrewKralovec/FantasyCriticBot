@@ -11,18 +11,18 @@ namespace FantasyBot
     public class Program
     {
         public static IConfigurationRoot Config { get; set; }
-        public static string Token => Config["Bot:ClientID"];
+        private static string Token => Config[Constants.ClientID];
         private DiscordSocketClient _client;
-        static void Main(string[] args)
+        static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         public Program()
         {
-            var devEnvironmentVariable = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
+            var devEnvironmentVariable = Environment.GetEnvironmentVariable(Constants.Env);
             var isDevelopment = string.IsNullOrEmpty(devEnvironmentVariable) ||
-                                devEnvironmentVariable.ToLower() == "development";
+                                devEnvironmentVariable.ToLower() == Constants.Dev;
 
-            // Get `appsettings.json`
+            // Get `appsettings.json`.
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
                 .AddJsonFile("appsettings.json",
@@ -31,32 +31,29 @@ namespace FantasyBot
 
             // Get the TOKEN for secrests, should store else where on prod.
             if (isDevelopment)
-            {
                 builder.AddUserSecrets<Program>();
-            }
 
             Config = builder.Build();
         }
 
         public async Task MainAsync()
         {
-            // call ConfigureServices to create the ServiceCollection/Provider for passing around the services.
             using (var services = ConfigureServices())
             {
-                // Get/Set client clients
+                // Get/Set client clients.
                 var client = services.GetRequiredService<DiscordSocketClient>();
                 _client = client;
 
-                // Handle log action events
+                // Handle log action events.
                 client.Log += LogAsync;
                 client.Ready += ReadyAsync;
                 services.GetRequiredService<CommandService>().Log += LogAsync;
 
-                // Get start bot
+                // Get start bot.
                 await client.LoginAsync(TokenType.Bot, Token);
                 await client.StartAsync();
 
-                // we get the CommandHandler class here and call the InitializeAsync method to start things up for the CommandHandler service.
+                // Call the InitializeAsync to start the CommandHandler service. 
                 await services.GetRequiredService<CommandHandler>().InitializeAsync();
 
                 await Task.Delay(-1);
@@ -86,5 +83,12 @@ namespace FantasyBot
                 .BuildServiceProvider();
         }
 
+    }
+    static class Constants
+    {
+        public const string ClientID = "Bot:ClientID";
+        public const string Dev = "development";
+        public const string Env = "NETCORE_ENVIRONMENT";
+        public const string JsonContent = "application/json";
     }
 }
