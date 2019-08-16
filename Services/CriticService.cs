@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json;
@@ -47,6 +48,8 @@ namespace FantasyBot
             {
                 response.EnsureSuccessStatusCode();
                 var temp = await response.Content.ReadAsStringAsync();
+                var tokenDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content.ReadAsStringAsync().Result);
+                var bearerToken = tokenDetails["token"]; 
 
                 // Attemping to make requests, but session is not saving.
                 var builder = new UriBuilder(_remoteServiceBaseUrl);
@@ -57,7 +60,17 @@ namespace FantasyBot
                 builder.Query = query.ToString();
                 string url = builder.ToString();
 
-                var result = await _httpClient.GetStringAsync(url);
+                // var result = await _httpClient.GetStringAsync(url);
+
+                using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, url))
+                {
+                    requestMessage.Headers.Authorization =
+                        new AuthenticationHeaderValue("Bearer", bearerToken);
+                    var result = await _httpClient.SendAsync(requestMessage);
+                    var resultContent = await result.Content.ReadAsStringAsync();
+                };
+
+
             }
         }
         // This method uses the shared instance of HttpClient for every call to GetProductAsync.
