@@ -1,10 +1,11 @@
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Http;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
+using System.Web;
 
 namespace FantasyBot
 {
@@ -28,7 +29,7 @@ namespace FantasyBot
             _remoteServiceBaseUrl = "https://www.fantasycritic.games/api/League/GetLeagueYear";
             _remoteServiceLoginUrl = "https://www.fantasycritic.games/api/account/login";
         }
-        public async Task<string> PostProductAsync()
+        public async Task InitializeAsync()
         {
             // Setup login Json. 
             var creds = new Login
@@ -37,7 +38,7 @@ namespace FantasyBot
                 password = ""
             };
             var payload = JsonConvert.SerializeObject(creds);
-            var requestContent = new StringContent(payload);
+            var requestContent = new StringContent(payload, Encoding.UTF8, "application/json");
             requestContent.Headers.ContentType = new MediaTypeHeaderValue(Constants.JsonContent); // Might need to move to handler.
 
             // Post login credentials
@@ -45,7 +46,18 @@ namespace FantasyBot
             using (var response = await _httpClient.PostAsync(_remoteServiceLoginUrl, requestContent))
             {
                 response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsStringAsync();
+                var temp = await response.Content.ReadAsStringAsync();
+
+                // Attemping to make requests, but session is not saving.
+                var builder = new UriBuilder(_remoteServiceBaseUrl);
+                builder.Port = -1;
+                var query = HttpUtility.ParseQueryString(builder.Query);
+                query["leagueID"] = "";
+                query["year"] = "2019";
+                builder.Query = query.ToString();
+                string url = builder.ToString();
+
+                var result = await _httpClient.GetStringAsync(url);
             }
         }
         // This method uses the shared instance of HttpClient for every call to GetProductAsync.
