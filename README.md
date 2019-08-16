@@ -23,7 +23,6 @@ Discord bot for fantasy critic.
 
 # Start
 ```sh
-> dotnet user-secrets set "Bot:ClientID" "TOKEN_HERE"
 > dotnet restore
 > dotnet run
 ```
