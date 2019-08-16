@@ -14,5 +14,13 @@ namespace FantasyBot
         [Summary("Echo back a command. For testing.")]
         public Task SayAsync(string echo)
             => ReplyAsync(echo);
+            
+        [Command("web")]
+        [Summary("Echo back a command. For testing.")]
+        public async Task WebAsync(string echo)
+        {
+            var data = await _client.GetProductAsync();
+            await ReplyAsync(data);
+        }
     }
 }

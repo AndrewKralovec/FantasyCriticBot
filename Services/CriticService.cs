@@ -39,8 +39,8 @@ namespace FantasyBot
                 password = ""
             };
             var payload = JsonConvert.SerializeObject(creds);
-            var requestContent = new StringContent(payload, Encoding.UTF8, "application/json");
-            requestContent.Headers.ContentType = new MediaTypeHeaderValue(Constants.JsonContent); // Might need to move to handler.
+            var requestContent = new StringContent(payload, Encoding.UTF8, Constants.JsonContent);
+            requestContent.Headers.ContentType = new MediaTypeHeaderValue(Constants.JsonContent); // Might want to move to handler.
 
             // Post login credentials
             // Using might be over kill now that it has a smaller scope. 
@@ -49,9 +49,17 @@ namespace FantasyBot
                 response.EnsureSuccessStatusCode();
                 var temp = await response.Content.ReadAsStringAsync();
                 var tokenDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content.ReadAsStringAsync().Result);
-                var bearerToken = tokenDetails["token"]; 
+                var bearerToken = tokenDetails["token"];
 
-                // Attemping to make requests, but session is not saving.
+                _httpClient.DefaultRequestHeaders.Authorization =
+                       new AuthenticationHeaderValue("Bearer", bearerToken);
+            }
+        }
+        // This method uses the shared instance of HttpClient for every call to GetProductAsync.
+        public async Task<string> GetProductAsync()
+        {
+            try
+            {
                 var builder = new UriBuilder(_remoteServiceBaseUrl);
                 builder.Port = -1;
                 var query = HttpUtility.ParseQueryString(builder.Query);
@@ -64,22 +72,10 @@ namespace FantasyBot
 
                 using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, url))
                 {
-                    requestMessage.Headers.Authorization =
-                        new AuthenticationHeaderValue("Bearer", bearerToken);
                     var result = await _httpClient.SendAsync(requestMessage);
                     var resultContent = await result.Content.ReadAsStringAsync();
+                    return resultContent;
                 };
-
-
-            }
-        }
-        // This method uses the shared instance of HttpClient for every call to GetProductAsync.
-        public async Task<string> GetProductAsync()
-        {
-            try
-            {
-                var result = await _httpClient.GetStringAsync(_remoteServiceBaseUrl);
-                return result;
             }
             catch (HttpRequestException)
             {
