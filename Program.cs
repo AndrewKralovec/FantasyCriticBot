@@ -1,18 +1,18 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
 
 namespace FantasyBot
 {
     public class Program
     {
-        public static IConfigurationRoot Config { get; set; }
-        private static string Token => Config[Constants.ClientID];
-        private DiscordSocketClient _client;
+        static IConfigurationRoot Config { get; set; }
+        static string Token => Config[Constants.ConfigID];
+        DiscordSocketClient _client;
         static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -22,10 +22,10 @@ namespace FantasyBot
             var isDevelopment = string.IsNullOrEmpty(devEnvironmentVariable) ||
                                 devEnvironmentVariable.ToLower() == Constants.Dev;
 
-            // Get `appsettings.json`.
+            // Get the settings file. 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
-                .AddJsonFile("appsettings.json",
+                .AddJsonFile(Constants.AppSettings,
                     optional: false,
                     reloadOnChange: true);
 
@@ -55,41 +55,28 @@ namespace FantasyBot
 
                 // Call the InitializeAsync to start the CommandHandler service. 
                 await services.GetRequiredService<CommandHandler>().InitializeAsync();
-                await services.GetRequiredService<CriticService>().InitializeAsync();
+                await services.GetRequiredService<FantasyCriticService>().InitializeAsync();
 
                 await Task.Delay(-1);
             }
         }
 
-        private Task LogAsync(LogMessage log)
-        {
-            Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
-        }
+        Task LogAsync(LogMessage log)
+            => Task.Run(() => Console.WriteLine(log.ToString()));
 
-        private Task ReadyAsync()
-        {
-            Console.WriteLine($"Connected as -> [{_client.CurrentUser}] :)");
-            return Task.CompletedTask;
-        }
+        Task ReadyAsync()
+            => Task.Run(() => Console.WriteLine($"Connected as -> [{_client.CurrentUser}] :)"));
 
-        private ServiceProvider ConfigureServices()
+        ServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
                 .AddSingleton(Config)
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
-                .AddSingleton<CriticService>()
+                .AddSingleton<FantasyCriticService>()
                 .BuildServiceProvider();
         }
 
-    }
-    static class Constants
-    {
-        public const string ClientID = "Bot:ClientID";
-        public const string Dev = "development";
-        public const string Env = "NETCORE_ENVIRONMENT";
-        public const string JsonContent = "application/json";
     }
 }
