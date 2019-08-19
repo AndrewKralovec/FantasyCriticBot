@@ -1,25 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Discord.Commands;
 using System.Threading.Tasks;
-using Discord.Commands;
 
 namespace FantasyBot
 {
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
-        public CriticService _client { get; set; }
+        public FantasyCriticService Client { get; set; }
 
         [Command("say")]
         [Summary("Echo back a command. For testing.")]
         public Task SayAsync(string echo)
             => ReplyAsync(echo);
-            
-        [Command("web")]
-        [Summary("Echo back a command. For testing.")]
-        public async Task WebAsync(string echo)
+
+        [Command("standings")]
+        [Summary("Get the league standings")]
+        public async Task StandingsAsync()
         {
-            var data = await _client.GetProductAsync();
+            var data = await Client.GetPlayerStandings();
             await ReplyAsync(data);
         }
     }
