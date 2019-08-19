@@ -24,19 +24,17 @@ namespace FantasyBot
             _commands = services.GetRequiredService<CommandService>();
             _client = services.GetRequiredService<DiscordSocketClient>();
             _services = services;
-            _prefix = _config["Bot:Prefix"];
+            _prefix = _config[Constants.ConfigPrefix];
 
             if (string.IsNullOrWhiteSpace(_prefix))
-                throw new Exception("Bot:Prefix missing from -> [appsettings.json]");
+                throw new Exception($"{Constants.ConfigPrefix} is missing from -> [{Constants.AppSettings}]");
 
             // Handle closing action.
             _commands.CommandExecuted += CommandExecutedAsync;
-
             // Handle message action, prevent bad commands.
             _client.MessageReceived += MessageReceivedAsync;
-
         }
-
+        
         public async Task InitializeAsync() 
             => await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
