@@ -26,7 +26,23 @@ Discord bot for fantasy critic.
 > dotnet user-secrets set "Bot:ClientID" "TOKEN_HERE"
 ```
 
-# Start
+`FantasyBot.csproj`   
+```
+<PropertyGroup>
+<OutputType>Exe</OutputType>
+<TargetFramework>netcoreapp2.1</TargetFramework>
+<UserSecretsId>PROJECT_ID</UserSecretsId>
+</PropertyGroup>
+```
+
+`appsettings.json`   
+```
+"Bot": {
+    "Prefix": "!"
+}
+```
+
+## Start
 ```sh
 > dotnet restore
 > dotnet run
@@ -47,4 +63,5 @@ Once but is running these are the current commands.
 
 ## Notes/Thoughts 
 Using dotnet because im more familiar with it. However, mono is a better supported runtime. Maybe i switch.
-Thinking that the notification Service should be in the same thread as the bot.
+Thinking that the notification Service should be in the same thread as the bot. You'll have to figure out how to store
+your login credits. I'm not at the point of storing them yet. 
