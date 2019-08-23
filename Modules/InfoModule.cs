@@ -1,4 +1,4 @@
-﻿using Discord.Commands;
+using Discord.Commands;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +27,7 @@ namespace FantasyBot
             await ReplyAsync(msg);
         }
         [Command("next_release")]
-        [Summary("Get the league standings")]
+        [Summary("Get the next game that will be released for your league")]
         public async Task NextRelease()
         {
             var game = await Client.GetNextGameRelease();
