@@ -1,4 +1,4 @@
-using Discord.Commands;
+﻿using Discord.Commands;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,6 +32,14 @@ namespace FantasyBot
         {
             var game = await Client.GetNextGameRelease();
             var msg = $"Fantasycritic update!!\n {game.gameName}, will be released: {game.releaseDate.ToString()}";
+            await ReplyAsync(msg);
+        }
+        [Command("watch")]
+        [Summary("Set league you want to watch for the bot")]
+        public async Task Watch(string id)
+        {
+            Client.LeagueID = id;
+            var msg = $"Set league id to {Client.LeagueID}";
             await ReplyAsync(msg);
         }
     }

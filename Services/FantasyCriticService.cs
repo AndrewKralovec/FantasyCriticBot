@@ -17,6 +17,7 @@ namespace FantasyBot
         static readonly HttpClient _httpClient;
         static readonly UriBuilder _remoteServiceBaseUrl;
         static readonly UriBuilder _remoteServiceLoginUrl;
+        public string LeagueID { get; set; } = "";
 
         static FantasyCriticService()
         {
@@ -60,7 +61,7 @@ namespace FantasyBot
         async Task<JObject> GetLeagueJson()
         {
             var query = HttpUtility.ParseQueryString(_remoteServiceBaseUrl.Query);
-            query["leagueID"] = "";
+            query["leagueID"] = LeagueID;
             query["year"] = "2019";
             _remoteServiceBaseUrl.Query = query.ToString();
 
