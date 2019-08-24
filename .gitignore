@@ -1,1 +1,6 @@
-FantasyBot.csproj
+FantasyCritic.Services/bin
+FantasyCritic.Services/obj
+FantasyCritic.Services.Tests/bin
+FantasyCritic.Services.Tests/obj
+FantasyCritic.Bot/bin
+FantasyCritic.Bot/obj
