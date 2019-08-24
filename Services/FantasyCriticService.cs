@@ -74,7 +74,6 @@ namespace FantasyBot
                 return JObject.Parse(resultContent);
             };
         }
-
         public async Task<List<PublisherJson>> GetLeaguePublishers()
         {
             try
@@ -119,6 +118,7 @@ namespace FantasyBot
         public string emailAddress { get; set; }
         public string password { get; set; }
     }
+    // 400 Bad Request doesnt really say much.
     [Serializable()]
     internal class FantasyRequestException : System.Exception
     {
