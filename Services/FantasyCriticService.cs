@@ -1,6 +1,6 @@
-using FantasyBot.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using FantasyBot.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,81 +36,81 @@ namespace FantasyBot
         }
         public async Task InitializeAsync()
         {
-            // Setup login Json. 
-            var creds = new Login
+            try
             {
-                emailAddress = "",
-                password = ""
-            };
-            var payload = JsonConvert.SerializeObject(creds);
-            var requestContent = new StringContent(payload, Encoding.UTF8, Constants.JsonContent);
-            requestContent.Headers.ContentType = new MediaTypeHeaderValue(Constants.JsonContent); // Might want to move to handler.
+                // Setup login Json. 
+                var creds = new Login
+                {
+                    emailAddress = "",
+                    password = ""
+                };
+                var payload = JsonConvert.SerializeObject(creds);
+                var requestContent = new StringContent(payload, Encoding.UTF8, Constants.JsonContent);
+                requestContent.Headers.ContentType = new MediaTypeHeaderValue(Constants.JsonContent); // Might want to move to handler.
 
-            // Post login credentials
-            // Using might be over kill now that it has a smaller scope. 
-            using (var response = await _httpClient.PostAsync(_remoteServiceLoginUrl.Uri, requestContent))
+                // Post login credentials
+                // Using might be over kill now that it has a smaller scope. 
+                using (var response = await _httpClient.PostAsync(_remoteServiceLoginUrl.Uri, requestContent))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var tokenDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseContent);
+                    var bearerToken = tokenDetails["token"];
+
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                           new AuthenticationHeaderValue("Bearer", bearerToken);
+                }
+            }
+            catch (Exception)
             {
-                response.EnsureSuccessStatusCode();
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var tokenDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseContent);
-                var bearerToken = tokenDetails["token"];
-
-                _httpClient.DefaultRequestHeaders.Authorization =
-                       new AuthenticationHeaderValue("Bearer", bearerToken);
+                throw new FantasyRequestException($"Login Error -> [Check your email or password]");
             }
         }
         async Task<JObject> GetLeagueJson()
         {
-            var query = HttpUtility.ParseQueryString(_remoteServiceBaseUrl.Query);
-            query["leagueID"] = LeagueID;
-            query["year"] = "2019";
-            _remoteServiceBaseUrl.Query = query.ToString();
-
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, _remoteServiceBaseUrl.Uri))
-            {
-                var response = await _httpClient.SendAsync(requestMessage);
-                response.EnsureSuccessStatusCode();
-                var resultContent = await response.Content.ReadAsStringAsync();
-                return JObject.Parse(resultContent);
-            };
-        }
-        public async Task<List<PublisherJson>> GetLeaguePublishers()
-        {
             try
             {
-                var leagueSearch = await GetLeagueJson();
-                var results = leagueSearch["players"].Children()
-                    .Select(player => player.ToObject<PlayerJson>())
-                    .Select(player => player.publisher)
-                    .ToList();
+                var query = HttpUtility.ParseQueryString(_remoteServiceBaseUrl.Query);
+                query["leagueID"] = LeagueID;
+                query["year"] = "2019";
+                _remoteServiceBaseUrl.Query = query.ToString();
 
-                return results;
+                using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, _remoteServiceBaseUrl.Uri))
+                {
+                    var response = await _httpClient.SendAsync(requestMessage);
+                    response.EnsureSuccessStatusCode();
+                    var resultContent = await response.Content.ReadAsStringAsync();
+                    return JObject.Parse(resultContent);
+                };
             }
             catch (Exception)
             {
-                throw new FantasyRequestException($"Error accessing: {_remoteServiceBaseUrl.ToString()}");
+                throw new FantasyRequestException($"Error accessing -> [{_remoteServiceBaseUrl.ToString()}]");
             }
+        }
 
+        public async Task<List<PublisherJson>> GetLeaguePublishers()
+        {
+            var leagueSearch = await GetLeagueJson();
+            var results = leagueSearch["players"].Children()
+                .Select(player => player.ToObject<PlayerJson>())
+                .Select(player => player.publisher)
+                .ToList();
+
+            return results;
         }
         public async Task<GameJson> GetNextGameRelease()
         {
-            try
-            {
-                var leagueSearch = await GetLeagueJson();
-                var gameResult = leagueSearch["publishers"].Children()
-                    .Select(player => player.ToObject<PublisherJson>())
-                    .Select(player => player.games)
-                    .SelectMany(games => games)
-                    .Where(game => game.releaseDate > DateTime.Now)
-                    .OrderBy(game => game.releaseDate)
-                    .FirstOrDefault();
+            var leagueSearch = await GetLeagueJson();
+            var gameResult = leagueSearch["publishers"].Children()
+                .Select(player => player.ToObject<PublisherJson>())
+                .Select(player => player.games)
+                .SelectMany(games => games)
+                .Where(game => game.releaseDate > DateTime.Now)
+                .OrderBy(game => game.releaseDate)
+                .FirstOrDefault();
 
-                return gameResult;
-            }
-            catch (Exception)
-            {
-                throw new FantasyRequestException($"Error accessing: {_remoteServiceBaseUrl.ToString()}");
-            }
+            return gameResult;
         }
     }
     internal class Login
@@ -118,7 +118,6 @@ namespace FantasyBot
         public string emailAddress { get; set; }
         public string password { get; set; }
     }
-    // 400 Bad Request doesnt really say much.
     [Serializable()]
     internal class FantasyRequestException : System.Exception
     {
