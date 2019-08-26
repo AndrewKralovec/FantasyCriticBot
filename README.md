@@ -63,9 +63,6 @@ Discord bot for fantasy critic.
 
 ## Usage
 Once but is running these are the current commands.  
-- say: Echos back the command you type. Used for testing.
-- standings: Leagues standings.
-- 
 | Name  | Description |
 | ------------- | ------------- |
 | say  | Echos back the command you type. Used for testing.  |
