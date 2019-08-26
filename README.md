@@ -21,8 +21,8 @@ Discord bot for fantasy critic.
 - [ ] Setup Docker.
 
 ## Setup
-- The bot token is going to be stored using the secret management tool. To use user secrets, you must define a `UserSecretsId` element within a `PropertyGroup` of the `FantasyBot.csproj` file. The inner text of `UserSecretsId` is arbitrary, but is unique to the project.`<UserSecretsId>PROJECT_ID</UserSecretsId>`. Then use dotnet to set the secret.
-- Set your bot prefix in `appsettings.json`.
+- The bot token is going to be stored using the secret management tool. To use user secrets, you must define a `UserSecretsId` element within a `PropertyGroup` of the `FantasyBot.csproj` file. The inner text of `UserSecretsId` is arbitrary, but is unique to the project.`<UserSecretsId>PROJECT_ID</UserSecretsId>`. Then use dotnet to set the secret. If this is not desirable, please feel free to set your secrets in `appsettings.json` or any other method.
+- Set your bot prefix in `appsettings.json`. Please set up any config you want in `appsettings.json`... for now. 
 ```sh
 > dotnet user-secrets set "Bot:ClientID" "TOKEN_HERE"
 ```
@@ -41,6 +41,10 @@ Discord bot for fantasy critic.
 "Bot": {
     "Prefix": "!"
 }
+```
+- (Optional), create a docker image. 
+```sh
+> docker build -t bot_image -f Dockerfile .
 ```
 
 ## Start
@@ -61,6 +65,12 @@ Discord bot for fantasy critic.
 Once but is running these are the current commands.  
 - say: Echos back the command you type. Used for testing.
 - standings: Leagues standings.
+- 
+| Name  | Description |
+| ------------- | ------------- |
+| say  | Echos back the command you type. Used for testing.  |
+| standings  | Get the league standings.  |
+| next_release  | Get the next game that will be released for your league.  |
 
 ## Notes/Thoughts 
 Using dotnet because im more familiar with it. However, mono is a better supported runtime. Maybe i switch.  

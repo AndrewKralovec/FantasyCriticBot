@@ -1,21 +1,14 @@
-# FROM mcr.microsoft.com/dotnet/core/runtime:2.2
-# COPY FantasyBot/bin/Release/netcoreapp2.2/publish/ FantasyBot/
-# ENTRYPOINT ["dotnet", "FantasyBot/FantasyBot.dll"]
-
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
-WORKDIR /FantasyBot
+WORKDIR /FantasyCriticBot
 
-# Copy csproj and restore as distinct layers
-COPY *.csproj ./
+COPY *.csproj .
 RUN dotnet restore
 
-# Copy everything else and build
-COPY . ./
+COPY . .
 RUN dotnet publish -c Release -o out
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/core/runtime:2.2
-WORKDIR /FantasyBot
-COPY --from=build /FantasyBot/out .
+FROM mcr.microsoft.com/dotnet/core/runtime:2.2 AS runtime
+WORKDIR /FantasyCriticBot
+COPY --from=build /FantasyCriticBot/out ./
 
 ENTRYPOINT ["dotnet", "FantasyBot.dll"]
