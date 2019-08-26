@@ -11,4 +11,4 @@ FROM mcr.microsoft.com/dotnet/core/runtime:2.2 AS runtime
 WORKDIR /FantasyCriticBot
 COPY --from=build /FantasyCriticBot/out ./
 
-ENTRYPOINT ["dotnet", "FantasyBot.dll"]
+ENTRYPOINT ["dotnet", "FantasyCriticBot.dll"]
