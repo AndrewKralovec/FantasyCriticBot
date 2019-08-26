@@ -18,7 +18,7 @@ Discord bot for fantasy critic.
 - [ ] Move classes into their own solutions.
 - [ ] Testing.
 - [ ] Summary comments for class methods.
-- [ ] Setup Docker.
+- [x] Setup Docker.
 
 ## Setup
 - The bot token is going to be stored using the secret management tool. To use user secrets, you must define a `UserSecretsId` element within a `PropertyGroup` of the `FantasyBot.csproj` file. The inner text of `UserSecretsId` is arbitrary, but is unique to the project.`<UserSecretsId>PROJECT_ID</UserSecretsId>`. Then use dotnet to set the secret. If this is not desirable, please feel free to set your secrets in `appsettings.json` or any other method.
