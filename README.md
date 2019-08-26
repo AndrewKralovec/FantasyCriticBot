@@ -62,7 +62,8 @@ Discord bot for fantasy critic.
 - Newtonsoft.Json
 
 ## Usage
-Once but is running these are the current commands.  
+Once but is running these are the current commands.
+
 | Name  | Description |
 | ------------- | ------------- |
 | say  | Echos back the command you type. Used for testing.  |
