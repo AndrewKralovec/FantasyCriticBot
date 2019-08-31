@@ -9,14 +9,18 @@ using System.Threading.Tasks;
 
 namespace FantasyBot
 {
+    /// <summary>
+    /// The applications main class.
+    /// </summary>
     public class Program
     {
         static IConfigurationRoot Config { get; set; }
         static string Token => Config[Constants.ConfigID];
         DiscordSocketClient _client;
-        static void Main()
-            => new Program().MainAsync().GetAwaiter().GetResult();
 
+        /// <summary>
+        /// Setup the Application configurations.
+        /// </summary>
         public Program()
         {
             var devEnvironmentVariable = Environment.GetEnvironmentVariable(Constants.Env);
@@ -37,6 +41,16 @@ namespace FantasyBot
             Config = builder.Build();
         }
 
+        /// <summary>
+        /// Invoke the new async main to establish an async context.
+        /// </summary>
+        static void Main()
+            => new Program().MainAsync().GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Start client connection/reconnection logic. 
+        /// </summary>
+        /// <returns></returns>
         public async Task MainAsync()
         {
             using (var services = ConfigureServices())
@@ -62,12 +76,25 @@ namespace FantasyBot
             }
         }
 
+        /// <summary>
+        /// Write any client logs to the Console.
+        /// </summary>
+        /// <param name="log">Log message</param>
+        /// <returns>The logged task</returns>
         Task LogAsync(LogMessage log)
             => Task.Run(() => Console.WriteLine(log.ToString()));
 
+        /// <summary>
+        /// Write that the client as started to the console.
+        /// </summary>
+        /// <returns>The logged task</returns>
         Task ReadyAsync()
             => Task.Run(() => Console.WriteLine($"Connected as -> [{_client.CurrentUser}] :)"));
 
+        /// <summary>
+        /// Returns the App's ServiceProvider that is used to call the services.
+        /// </summary>
+        /// <returns>The Bot ServiceProvider</returns>
         ServiceProvider ConfigureServices()
         {
             return new ServiceCollection()

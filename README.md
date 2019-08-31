@@ -17,8 +17,8 @@ Discord bot for fantasy critic.
 - [ ] Create a Notification service to notify discord members about league/game details.
 - [ ] Move classes into their own solutions.
 - [ ] Testing.
-- [ ] Summary comments for class methods.
-- [ ] Setup Docker.
+- [x] Summary comments for class methods.
+- [x] Setup Docker.
 
 ## Setup
 - The bot token is going to be stored using the secret management tool. To use user secrets, you must define a `UserSecretsId` element within a `PropertyGroup` of the `FantasyBot.csproj` file. The inner text of `UserSecretsId` is arbitrary, but is unique to the project.`<UserSecretsId>PROJECT_ID</UserSecretsId>`. Then use dotnet to set the secret.
@@ -67,3 +67,4 @@ Using dotnet because im more familiar with it. However, mono is a better support
 Thinking that the notification Service should be in the same thread as the bot.  
 You'll have to figure out how to store
 your login credits. I'm not at the point of storing them yet. 
+The PostFix Json for the fantasy models, might be miss leadings, since they are read as json but parsed. Maybe i change.  
