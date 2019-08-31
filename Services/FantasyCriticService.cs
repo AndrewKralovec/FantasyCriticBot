@@ -1,6 +1,8 @@
 using FantasyBot.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +15,23 @@ using System.Web;
 
 namespace FantasyBot
 {
+    /// <summary>
+    /// Service class for getting Fantasy Critic data from their API.
+    /// </summary>
     public class FantasyCriticService
     {
         static readonly HttpClient _httpClient;
         static readonly UriBuilder _remoteServiceBaseUrl;
         static readonly UriBuilder _remoteServiceLoginUrl;
+        readonly IConfigurationRoot _config;
         public string LeagueID { get; set; } = "";
 
+        /// <summary>
+        /// The static <c>FantasyCriticService</c> class constructor. Sets a shared instance of HttpClient for the class.
+        /// </summary>
         static FantasyCriticService()
         {
             // Define a persistant session.
-            // Methods use the shared instance of HttpClient for every call.
             _httpClient = new HttpClient(
                 new HttpClientHandler
                 {
@@ -34,91 +42,126 @@ namespace FantasyBot
             _remoteServiceBaseUrl = new UriBuilder("https://www.fantasycritic.games/api/League/GetLeagueYear");
             _remoteServiceLoginUrl = new UriBuilder("https://www.fantasycritic.games/api/account/login");
         }
+
+        /// <summary>
+        /// The main <c>FantasyCriticService</c> class constructor.
+        /// </summary>
+        /// <param name="services">App/Service configurations </param>
+        public FantasyCriticService(IServiceProvider services)
+        {
+            // Define services
+            _config = services.GetRequiredService<IConfigurationRoot>();
+
+            // Check if user wants to set LeagueID on startup
+            if (!string.IsNullOrWhiteSpace(_config[Constants.ConfigLeagueID]))
+                LeagueID = _config[Constants.ConfigLeagueID];
+
+        }
+
+        /// <summary>
+        /// Request and set the authentication token using the user credentials.
+        /// </summary>
+        /// <exception cref="FantasyBot.FantasyRequestException">Thrown when there is a login error</exception>
+        /// <returns></returns>
         public async Task InitializeAsync()
         {
-            // Setup login Json. 
-            var creds = new Login
+            try
             {
-                emailAddress = "",
-                password = ""
-            };
-            var payload = JsonConvert.SerializeObject(creds);
-            var requestContent = new StringContent(payload, Encoding.UTF8, Constants.JsonContent);
-            requestContent.Headers.ContentType = new MediaTypeHeaderValue(Constants.JsonContent); // Might want to move to handler.
+                // Setup the JSON login content.
+                var requestContent = new StringContent(JsonConvert.SerializeObject(value: new LoginJson
+                {
+                    emailAddress = _config[Constants.ConfigEmail],
+                    password = _config[Constants.ConfigPassword]
+                }), Encoding.UTF8, Constants.JsonContent);
 
-            // Post login credentials
-            // Using might be over kill now that it has a smaller scope. 
-            using (var response = await _httpClient.PostAsync(_remoteServiceLoginUrl.Uri, requestContent))
+                requestContent.Headers.ContentType = new MediaTypeHeaderValue(Constants.JsonContent); // Might want to move to handler.
+
+                // Post login credentials.
+                // Using might be over kill now that it has a smaller scope. 
+                using (var response = await _httpClient.PostAsync(_remoteServiceLoginUrl.Uri, requestContent))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var tokenDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseContent);
+                    var bearerToken = tokenDetails["token"];
+
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                           new AuthenticationHeaderValue("Bearer", bearerToken);
+                }
+            }
+            catch (Exception)
             {
-                response.EnsureSuccessStatusCode();
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var tokenDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseContent);
-                var bearerToken = tokenDetails["token"];
-
-                _httpClient.DefaultRequestHeaders.Authorization =
-                       new AuthenticationHeaderValue("Bearer", bearerToken);
+                throw new FantasyRequestException($"[Login Error]: Check your email or password");
             }
         }
+
+        /// <summary>
+        /// Get and parse the League JSON from the API. 
+        /// </summary>
+        /// <exception cref="FantasyBot.FantasyRequestException">Thrown when there problem getting League data</exception>
+        /// <returns>League JSON parsed object</returns>
         async Task<JObject> GetLeagueJson()
         {
-            var query = HttpUtility.ParseQueryString(_remoteServiceBaseUrl.Query);
-            query["leagueID"] = LeagueID;
-            query["year"] = "2019";
-            _remoteServiceBaseUrl.Query = query.ToString();
+            if (string.IsNullOrEmpty(LeagueID))
+                throw new FantasyRequestException("[League Error]: No leagueID has been set, are you watching a league?");
 
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, _remoteServiceBaseUrl.Uri))
+            try
             {
-                var response = await _httpClient.SendAsync(requestMessage);
-                response.EnsureSuccessStatusCode();
-                var resultContent = await response.Content.ReadAsStringAsync();
-                return JObject.Parse(resultContent);
-            };
+                var query = HttpUtility.ParseQueryString(_remoteServiceBaseUrl.Query);
+                query["leagueID"] = LeagueID;
+                query["year"] = "2019"; // Move to paramters later 
+                _remoteServiceBaseUrl.Query = query.ToString();
+
+                // Call the API League endpoint, with the LeagueID and year.
+                using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, _remoteServiceBaseUrl.Uri))
+                {
+                    var response = await _httpClient.SendAsync(requestMessage);
+                    response.EnsureSuccessStatusCode();
+                    var resultContent = await response.Content.ReadAsStringAsync();
+                    return JObject.Parse(resultContent);
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new FantasyRequestException($"[League Error]: Error accessing {_remoteServiceBaseUrl.ToString()}, {ex.Message}");
+            }
         }
+        /// <summary>
+        /// Get the publishers currently apart of the League.
+        /// </summary>
+        /// <returns>The League Publishers</returns>
         public async Task<List<PublisherJson>> GetLeaguePublishers()
         {
-            try
-            {
-                var leagueSearch = await GetLeagueJson();
-                var results = leagueSearch["players"].Children()
-                    .Select(player => player.ToObject<PlayerJson>())
-                    .Select(player => player.publisher)
-                    .ToList();
+            var leagueSearch = await GetLeagueJson();
+            var results = leagueSearch["players"].Children()
+                .Select(player => player.ToObject<PlayerJson>())
+                .Select(player => player.publisher)
+                .ToList();
 
-                return results;
-            }
-            catch (Exception)
-            {
-                throw new FantasyRequestException($"Error accessing: {_remoteServiceBaseUrl.ToString()}");
-            }
-
+            return results;
         }
+        /// <summary>
+        /// Get next game, in the League that will be released (from now). 
+        /// </summary>
+        /// <returns>The next Game</returns>
         public async Task<GameJson> GetNextGameRelease()
         {
-            try
-            {
-                var leagueSearch = await GetLeagueJson();
-                var gameResult = leagueSearch["publishers"].Children()
-                    .Select(player => player.ToObject<PublisherJson>())
-                    .Select(player => player.games)
-                    .SelectMany(games => games)
-                    .Where(game => game.releaseDate > DateTime.Now)
-                    .OrderBy(game => game.releaseDate)
-                    .FirstOrDefault();
+            var leagueSearch = await GetLeagueJson();
+            var gameResult = leagueSearch["publishers"].Children()
+                .Select(player => player.ToObject<PublisherJson>())
+                .Select(player => player.games)
+                .SelectMany(games => games)
+                .Where(game => game.releaseDate > DateTime.Now)
+                .OrderBy(game => game.releaseDate)
+                .FirstOrDefault();
 
-                return gameResult;
-            }
-            catch (Exception)
-            {
-                throw new FantasyRequestException($"Error accessing: {_remoteServiceBaseUrl.ToString()}");
-            }
+            return gameResult;
         }
     }
-    internal class Login
-    {
-        public string emailAddress { get; set; }
-        public string password { get; set; }
-    }
-    // 400 Bad Request doesnt really say much.
+
+    /// <summary>
+    /// The internal <c>FantasyRequestException</c> class. In charge of any errors with the Fantasy Critic API.
+    /// </summary>
     [Serializable()]
     internal class FantasyRequestException : System.Exception
     {

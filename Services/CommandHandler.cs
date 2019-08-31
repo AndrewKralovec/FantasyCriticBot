@@ -1,15 +1,19 @@
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
+
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using FantasyBot.Models;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace FantasyBot
 {
+    /// <summary>
+    /// Service class for handling discord bot commands.
+    /// </summary>
     public class CommandHandler
     {
         private readonly IConfigurationRoot _config;
@@ -18,6 +22,10 @@ namespace FantasyBot
         private readonly IServiceProvider _services;
         private readonly string _prefix;
 
+        /// <summary>
+        /// Retrieve client and CommandService instance to setup the handlers.
+        /// </summary>
+        /// <param name="services"></param>
         public CommandHandler(IServiceProvider services)
         {
             // Define services
@@ -35,10 +43,18 @@ namespace FantasyBot
             // Handle message action, prevent bad commands.
             _client.MessageReceived += MessageReceivedAsync;
         }
-        
+
+        /// <summary>
+        /// Load the Discord command modules and inject the services.
+        /// </summary>
+        /// <returns>The command modules</returns>
         public async Task InitializeAsync() 
             => await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
+        /// <summary>
+        /// Message handler. Attempts to exectue a requested command.
+        /// </summary>
+        /// <param name="rawMessage">Message</param>
         public async Task MessageReceivedAsync(SocketMessage rawMessage)
         {
             // Don't process system/other bot messages
@@ -60,6 +76,13 @@ namespace FantasyBot
             await _commands.ExecuteAsync(context, argPos, _services);
         }
 
+        /// <summary>
+        /// Execute the command with the command context. Handle any Exceptions with the command.
+        /// </summary>
+        /// <param name="command">Bot command</param>
+        /// <param name="context">Context of the command</param>
+        /// <param name="result">Result of the command</param>
+        /// <returns></returns>
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
             // Command not found
