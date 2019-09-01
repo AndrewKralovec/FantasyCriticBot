@@ -37,9 +37,9 @@ namespace FantasyBot
             await ReplyAsync(msg);
         }
 
-        [Command("watch")]
+        [Command("change_league")]
         [Summary("Set league you want to watch for the bot")]
-        public async Task Watch(string id)
+        public async Task SetLeagueID(string id)
         {
             Client.LeagueID = id;
             var msg = $"Set league id to {Client.LeagueID}";
