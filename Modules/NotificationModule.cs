@@ -33,9 +33,17 @@ namespace FantasyBot
             if (!String.IsNullOrEmpty(dateInput))
             {
                 var date = DateTime.Parse(dateInput);
-                Notifications.NotificationTime = date;
-                msg = "Notification settings have been updated.\n" +
-                    $"The next notification will be announced at, {Notifications.NotificationTime}.";
+
+                if (DateTime.Now > date)
+                {
+                    msg = "Date cannot be in the past";
+                }
+                else 
+                {
+                    Notifications.NotificationTime = date;
+                    msg = "Notification settings have been updated.\n" +
+                        $"The next notification will be announced at, {Notifications.NotificationTime}.";
+                }
             }
             await ReplyAsync(msg);
         }
