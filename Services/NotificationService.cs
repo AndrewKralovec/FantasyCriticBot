@@ -8,18 +8,23 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FantasyBot
 {
     public class NotificationService : Scheduler
     {
         readonly DiscordSocketClient _client;
+        readonly FantasyCriticService _criticService;
         readonly TimeSpan _daySpan = TimeSpan.FromHours(24);
+        readonly string _notificationTitle;
         public NotificationService(IServiceProvider services) : base()
         {
             // Define services
             _client = services.GetRequiredService<DiscordSocketClient>();
+            _criticService = services.GetRequiredService<FantasyCriticService>();
+            _notificationTitle = "Fantasy Critic Notification";
         }
 
         /// <summary>The time when the notification will be announced. Make configurable later...</summary>
@@ -31,13 +36,19 @@ namespace FantasyBot
 
         public void AddNotification(string leagueId)
         {
+            // The time span until <c>NotificationTime</c>.
             var offset = NotificationTime - DateTime.Now;
             ScheduleTask(leagueId, ReleaseNotification, offset, _daySpan);
         }
 
-        public void ReleaseNotification(object state)
+        public async void ReleaseNotification(object state)
         {
-            throw new NotImplementedException();
+            var games = await _criticService.GetLeagueGameReleases();
+            var releases = games
+                .Select(game => $"{game.GameName} will be released: {game.FormatedDate}")
+                .ToArray();
+
+            var msg = $"{_notificationTitle}\n" + String.Join(".\n", releases);
         }
     }
 }
