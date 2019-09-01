@@ -16,14 +16,14 @@ namespace FantasyBot
     /// </summary>
     public class CommandHandler
     {
-        private readonly IConfigurationRoot _config;
-        private readonly CommandService _commands;
-        private readonly DiscordSocketClient _client;
-        private readonly IServiceProvider _services;
-        private readonly string _prefix;
+        readonly IConfigurationRoot _config;
+        readonly CommandService _commands;
+        readonly DiscordSocketClient _client;
+        readonly IServiceProvider _services;
+        readonly string _prefix;
 
         /// <summary>
-        /// Retrieve client and CommandService instance to setup the handlers.
+        /// The <c>CommandHandler</c> class constructor. Retrieve client and CommandService instance to setup the handlers.
         /// </summary>
         /// <param name="services"></param>
         public CommandHandler(IServiceProvider services)

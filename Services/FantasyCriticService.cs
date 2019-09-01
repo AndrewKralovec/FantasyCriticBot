@@ -44,7 +44,7 @@ namespace FantasyBot
         }
 
         /// <summary>
-        /// The main <c>FantasyCriticService</c> class constructor.
+        /// The <c>FantasyCriticService</c> class constructor. Setup services.
         /// </summary>
         /// <param name="services">App/Service configurations </param>
         public FantasyCriticService(IServiceProvider services)
@@ -68,11 +68,12 @@ namespace FantasyBot
             try
             {
                 // Setup the JSON login content.
-                var requestContent = new StringContent(JsonConvert.SerializeObject(value: new LoginJson
-                {
-                    emailAddress = _config[Constants.ConfigEmail],
-                    password = _config[Constants.ConfigPassword]
-                }), Encoding.UTF8, Constants.JsonContent);
+                var requestContent = new StringContent(JsonConvert.SerializeObject(value:
+                    new LoginJson
+                    {
+                        emailAddress = _config[Constants.ConfigEmail],
+                        password = _config[Constants.ConfigPassword]
+                    }), Encoding.UTF8, Constants.JsonContent);
 
                 requestContent.Headers.ContentType = new MediaTypeHeaderValue(Constants.JsonContent); // Might want to move to handler.
 
