@@ -1,14 +1,9 @@
 ﻿
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
 using FantasyBot.Models;
-using Microsoft.Extensions.Configuration;
 using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace FantasyBot
@@ -49,6 +44,16 @@ namespace FantasyBot
                 .ToArray();
 
             var msg = $"{_notificationTitle}\n" + String.Join(".\n", releases);
+
+            var channel = _client
+                .Guilds
+                .FirstOrDefault()
+                .Channels
+                .Select(c => _client.GetChannel(c.Id) as IMessageChannel)
+                .OfType<IMessageChannel>()
+                .FirstOrDefault();
+    
+            await channel.SendMessageAsync(msg);
         }
     }
 }
