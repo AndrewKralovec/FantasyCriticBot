@@ -1,5 +1,7 @@
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FantasyBot.Models
 {
@@ -21,5 +23,9 @@ namespace FantasyBot.Models
         public bool userIsInLeague { get; set; }
         public bool publicLeague { get; set; }
         public bool outstandingInvite { get; set; }
+        public GameJson NextGameReleased() => games
+               .Where(game => game.releaseDate > DateTime.Now)
+               .OrderBy(game => game.releaseDate)
+               .FirstOrDefault();
     }
 }

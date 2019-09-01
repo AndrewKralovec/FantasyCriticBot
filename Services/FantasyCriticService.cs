@@ -1,4 +1,4 @@
-using FantasyBot.Models;
+﻿using FantasyBot.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
@@ -127,6 +127,7 @@ namespace FantasyBot
                 throw new FantasyRequestException($"[League Error]: Error accessing {_remoteServiceBaseUrl.ToString()}, {ex.Message}");
             }
         }
+
         /// <summary>
         /// Get the publishers currently apart of the League.
         /// </summary>
@@ -141,20 +142,34 @@ namespace FantasyBot
 
             return results;
         }
+
         /// <summary>
         /// Get next game, in the League that will be released (from now). 
         /// </summary>
         /// <returns>The next Game</returns>
-        public async Task<GameJson> GetNextGameRelease()
+        public async Task<GameRelease> GetNextGameRelease()
         {
             var leagueSearch = await GetLeagueJson();
             var gameResult = leagueSearch["publishers"].Children()
-                .Select(player => player.ToObject<PublisherJson>())
-                .Select(player => player.games)
-                .SelectMany(games => games)
-                .Where(game => game.releaseDate > DateTime.Now)
-                .OrderBy(game => game.releaseDate)
+                .Select(publisher => publisher.ToObject<PublisherJson>())
+                .Select(publisher => new GameRelease(publisher))
+                .OrderBy(game => game.ReleaseDate)
                 .FirstOrDefault();
+
+            return gameResult;
+        }
+        
+        /// <summary>
+        /// Get the next game to be released for every publisher in the league. 
+        /// </summary>
+        /// <returns>League game releases</returns>
+        public async Task<List<GameRelease>> GetLeagueGameReleases()
+        {
+            var leagueSearch = await GetLeagueJson();
+            var gameResult = leagueSearch["publishers"].Children()
+                .Select(publisher => publisher.ToObject<PublisherJson>())
+                .Select(publisher => new GameRelease(publisher))
+                .ToList();
 
             return gameResult;
         }
