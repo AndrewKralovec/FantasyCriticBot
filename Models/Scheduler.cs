@@ -5,10 +5,12 @@ using System.Threading;
 namespace FantasyBot.Models
 {
     /// <summary>
-    /// Abstract <c>Scheduler</c> class. Defines how to schedule tasks.
+    /// Abstract <c>Scheduler</c> class. Defines how to schedule tasks. 
+    /// Abstract because services should manage their own tasks.
     /// </summary>
     public abstract class Scheduler
     {
+        // Makes sense for now, might need to change when its time to start/stop tasks.
         readonly Dictionary<string, Timer> _tasks;
         /// <summary>
         /// The <c>Scheduler</c> class constructor.
