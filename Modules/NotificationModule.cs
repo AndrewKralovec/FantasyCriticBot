@@ -11,7 +11,7 @@ namespace FantasyBot
         public NotificationService Notifications { get; set; }
 
         [Command("watch")]
-        [Summary("Set league you want to watch for the bot")]
+        [Summary("Add a league to the Notification service")]
         public async Task Watch(string id = "")
         {
             if(String.IsNullOrEmpty(id))
@@ -22,6 +22,21 @@ namespace FantasyBot
             var msg = $"You are now watching, {id}.\n" + 
                 "You will now receive be notified everyday of league game releases.\n" +
                 $"The next notification will be announced at, {Notifications.NotificationTime}.";
+            await ReplyAsync(msg);
+        }
+
+        [Command("change_schedule")]
+        [Summary("Chanage Notification scheduling time")]
+        public async Task SetNotificationTime(string dateInput = "")
+        {
+            var msg = "Date input was empty. Please enter a valid date";
+            if (!String.IsNullOrEmpty(dateInput))
+            {
+                var date = DateTime.Parse(dateInput);
+                Notifications.NotificationTime = date;
+                msg = "Notification settings have been updated.\n" +
+                    $"The next notification will be announced at, {Notifications.NotificationTime}.";
+            }
             await ReplyAsync(msg);
         }
     }
