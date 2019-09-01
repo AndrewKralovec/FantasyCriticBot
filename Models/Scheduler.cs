@@ -4,15 +4,29 @@ using System.Threading;
 
 namespace FantasyBot.Models
 {
+    /// <summary>
+    /// Abstract <c>Scheduler</c> class. Defines how to schedule tasks.
+    /// </summary>
     public abstract class Scheduler
     {
-        public readonly Dictionary<string, Timer> JobTasks;
+        readonly Dictionary<string, Timer> _tasks;
+        /// <summary>
+        /// The <c>Scheduler</c> class constructor.
+        /// </summary>
         public Scheduler()
-            => JobTasks = new Dictionary<string, Timer>();
+            => _tasks = new Dictionary<string, Timer>();
+
+        /// <summary>
+        /// Initializes a new threaded timer with the requested task. The timer is Registered to <c>_tasks</c> collection.
+        /// </summary>
+        /// <param name="taskId">Key used to find the task</param>
+        /// <param name="task">Operation to be run by timer</param>
+        /// <param name="dueTime">When the timer starts</param>
+        /// <param name="interval">How often it runs</param>
         public virtual void ScheduleTask(string taskId, TimerCallback task, TimeSpan dueTime, TimeSpan interval)
         {
             var timer = new Timer(task, null, dueTime, interval);
-            JobTasks.Add(taskId, timer);
+            _tasks.Add(taskId, timer);
         }
     }
 }
