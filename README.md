@@ -51,10 +51,12 @@ Once but is running these are the current commands.
 
 | Name  | Description |
 | ------------- | ------------- |
+| change_league  | Set league you want to watch for the bot. |
+| change_schedule  | Change Notification scheduling time. |
+| next_release  | Get the next game that will be released for your league.  |
 | say  | Echos back the command you type. Used for testing.  |
 | standings  | Get the league standings.  |
-| next_release  | Get the next game that will be released for your league.  |
-
+| watch  | Add a league to the Notification service.  |
 
 ## Todo
 - [x] Fill out readme.

@@ -26,7 +26,7 @@ namespace FantasyBot
         }
 
         [Command("change_schedule")]
-        [Summary("Chanage Notification scheduling time")]
+        [Summary("Change Notification scheduling time")]
         public async Task SetNotificationTime(string dateInput = "")
         {
             var msg = "Date input was empty. Please enter a valid date";
