@@ -26,14 +26,17 @@ namespace FantasyBot
             var msg = String.Join(".\n", results);
             await ReplyAsync(msg);
         }
+
         [Command("next_release")]
         [Summary("Get the next game that will be released for your league")]
         public async Task NextRelease()
         {
             var game = await Client.GetNextGameRelease();
-            var msg = $"Fantasycritic update!!\n {game.gameName}, will be released: {game.releaseDate.ToString()}";
+            var user = Context.Client.CurrentUser;
+            var msg = $"{user.Username}, {game.GameName} will be released: {game.FormatedDate}";
             await ReplyAsync(msg);
         }
+
         [Command("watch")]
         [Summary("Set league you want to watch for the bot")]
         public async Task Watch(string id)
