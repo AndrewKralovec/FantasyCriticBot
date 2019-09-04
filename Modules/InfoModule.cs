@@ -10,7 +10,7 @@ namespace FantasyBot
         public FantasyCriticService Client { get; set; }
 
         [Command("say")]
-        [Summary("Echo back a command. For testing.")]
+        [Summary("Echo back a command. For testing")]
         public Task SayAsync(string echo)
             => ReplyAsync(echo);
 

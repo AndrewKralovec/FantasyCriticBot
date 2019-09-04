@@ -45,6 +45,10 @@ Discord bot for fantasy critic.
 > dotnet restore
 > dotnet run
 ```
+- (Optional), run docker image. 
+```sh
+> docker run -it bot_image
+```
 
 ## Usage
 Once but is running these are the current commands.
@@ -56,6 +60,7 @@ Once but is running these are the current commands.
 | next_release  | Get the next game that will be released for your league.  |
 | say  | Echos back the command you type. Used for testing.  |
 | standings  | Get the league standings.  |
+| time  | Echo back what time the bot thinks it is.  |
 | watch  | Add a league to the Notification service.  |
 
 ## Todo
