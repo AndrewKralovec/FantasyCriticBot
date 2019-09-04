@@ -10,9 +10,14 @@ namespace FantasyBot
         public FantasyCriticService Client { get; set; }
 
         [Command("say")]
-        [Summary("Echo back a command. For testing.")]
+        [Summary("Echo back a command. For testing")]
         public Task SayAsync(string echo)
             => ReplyAsync(echo);
+
+        [Command("time")]
+        [Summary("Echo back what time the bot thinks it is")]
+        public Task TimeAsync()
+            => ReplyAsync(DateTime.Now.ToString());
 
         [Command("standings")]
         [Summary("Get the league standings")]
@@ -26,17 +31,20 @@ namespace FantasyBot
             var msg = String.Join(".\n", results);
             await ReplyAsync(msg);
         }
+
         [Command("next_release")]
         [Summary("Get the next game that will be released for your league")]
         public async Task NextRelease()
         {
             var game = await Client.GetNextGameRelease();
-            var msg = $"Fantasycritic update!!\n {game.gameName}, will be released: {game.releaseDate.ToString()}";
+            var user = Context.Client.CurrentUser;
+            var msg = $"{user.Username}, {game.GameName} will be released: {game.FormatedDate}";
             await ReplyAsync(msg);
         }
-        [Command("watch")]
+
+        [Command("change_league")]
         [Summary("Set league you want to watch for the bot")]
-        public async Task Watch(string id)
+        public async Task SetLeagueID(string id)
         {
             Client.LeagueID = id;
             var msg = $"Set league id to {Client.LeagueID}";

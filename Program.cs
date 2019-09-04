@@ -71,7 +71,7 @@ namespace FantasyBot
                 // Call the InitializeAsync to start the CommandHandler service. 
                 await services.GetRequiredService<CommandHandler>().InitializeAsync();
                 await services.GetRequiredService<FantasyCriticService>().InitializeAsync();
-
+                
                 await Task.Delay(-1);
             }
         }
@@ -103,6 +103,7 @@ namespace FantasyBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<FantasyCriticService>()
+                .AddSingleton<NotificationService>()
                 .BuildServiceProvider();
         }
 
