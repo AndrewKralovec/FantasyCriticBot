@@ -36,12 +36,12 @@ namespace FantasyBot
 
                 if (DateTime.Now > date)
                 {
-                    msg = "Date cannot be in the past";
+                    msg = $"Date, {date.ToString()}, is in the past. It must be a future date";
                 }
                 else 
                 {
                     Notifications.NotificationTime = date;
-                    msg = "Notification settings have been updated.\n" +
+                    msg = ":bell: Notification settings have been updated.\n" +
                         $"The next notification will be announced at, {Notifications.NotificationTime}.";
                 }
             }
