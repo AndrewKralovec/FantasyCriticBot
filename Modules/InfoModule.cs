@@ -16,7 +16,7 @@ namespace FantasyBot
 
         [Command("time")]
         [Summary("Echo back what time the bot thinks it is")]
-        public Task TimeAsync(string echo)
+        public Task TimeAsync()
             => ReplyAsync(DateTime.Now.ToString());
 
         [Command("standings")]
