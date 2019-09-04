@@ -14,6 +14,11 @@ namespace FantasyBot
         public Task SayAsync(string echo)
             => ReplyAsync(echo);
 
+        [Command("time")]
+        [Summary("Echo back what time the bot thinks it is")]
+        public Task TimeAsync(string echo)
+            => ReplyAsync(DateTime.Now.ToString());
+
         [Command("standings")]
         [Summary("Get the league standings")]
         public async Task StandingsAsync()
