@@ -11,7 +11,7 @@ namespace FantasyBot
     /// <summary>
     /// Service class for notifying users about League info.
     /// </summary>
-    public class NotificationService : Scheduler
+    public class ReleasesService : Announcement
     {
         readonly DiscordSocketClient _client;
         readonly FantasyCriticService _criticService;
@@ -24,16 +24,16 @@ namespace FantasyBot
         /// </summary>
         /// <param name="services">App/Service configurations </param>
         /// 
-        public NotificationService(IServiceProvider services) : base()
+        public ReleasesService(IServiceProvider services) : base()
         {
             // Define services
             _client = services.GetRequiredService<DiscordSocketClient>();
             _criticService = services.GetRequiredService<FantasyCriticService>();
             _notificationTitle = "Fantasy Critic Notification";
-            _notificationTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 6, 0, 0).Add(_daySpan);
+            _notificationTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 59);
         }
 
-        /// <summary>The time when the notification will be announced. Make configurable later...</summary>
+        /// <summary>Public accessor for time when the notification will be announced. Make configurable later...</summary>
         /// <value>Tommorrow at 06:00 AM</value>
         public DateTime NotificationTime
         {
@@ -41,16 +41,15 @@ namespace FantasyBot
             set => _notificationTime = value;
         }
 
+        /// <summary> The time span until <c>_notificationTime</c>.</summary>
+        TimeSpan TimeOffset { get => _notificationTime - DateTime.Now; }
+
         /// <summary>
         /// Add a task with the offset from now and when notifications will be invoke. 
         /// </summary>
         /// <param name="leagueId">Task Key</param>
         public void AddNotification(string leagueId)
-        {
-            // The time span until <c>NotificationTime</c>.
-            var offset = NotificationTime - DateTime.Now;
-            ScheduleTask(leagueId, ReleaseNotification, offset, _daySpan);
-        }
+            => ScheduleTask(leagueId, ReleaseNotification, TimeOffset, _daySpan);
 
         /// <summary>
         /// (Currently) The only <c>Notification</c> task.
@@ -77,6 +76,15 @@ namespace FantasyBot
                 .FirstOrDefault();
     
             await channel.SendMessageAsync(msg);
+        }
+
+        public bool ChangeNotificationTime(DateTime date, string leagueId)
+        {
+            _notificationTime = date;
+            if (TaskExists(leagueId))
+                return UpdateTaskTime(leagueId, TimeOffset, _daySpan);
+
+            return true;
         }
     }
 }

@@ -8,7 +8,7 @@ namespace FantasyBot
     public class NotificationModule : ModuleBase<SocketCommandContext>
     {
         public FantasyCriticService Client { get; set; }
-        public NotificationService Notifications { get; set; }
+        public ReleasesService Notifications { get; set; }
 
         [Command("watch")]
         [Summary("Add a league to the Notification service")]
@@ -27,23 +27,30 @@ namespace FantasyBot
 
         [Command("change_schedule")]
         [Summary("Change Notification scheduling time")]
-        public async Task SetNotificationTime(string dateInput = "")
+        public async Task SetNotificationTime(string dateInput = "", string id = "")
         {
-            var msg = "Date input was empty. Please enter a valid date";
-            if (!String.IsNullOrEmpty(dateInput))
-            {
-                var date = DateTime.Parse(dateInput);
+            if (String.IsNullOrEmpty(id))
+                id = Client.LeagueID;
 
-                if (DateTime.Now > date)
-                {
-                    msg = $"Date, {date.ToString()}, is in the past. It must be a future date";
-                }
-                else 
-                {
-                    Notifications.NotificationTime = date;
-                    msg = ":bell: Notification settings have been updated.\n" +
-                        $"The next notification will be announced at, {Notifications.NotificationTime}.";
-                }
+            if (String.IsNullOrEmpty(dateInput))
+            {
+                await ReplyAsync("Date input was empty. Please enter a valid date");
+                return;
+            }
+
+            var date = DateTime.Parse(dateInput);
+            if (DateTime.Now > date)
+            {
+                await ReplyAsync($"Date, {date.ToString()}, is in the past. It must be a future date");
+                return;
+            }
+
+            var updated = Notifications.ChangeNotificationTime(date, id);
+            var msg = $"Was unable to change the notification scheduling time";
+            if (updated)
+            {
+                msg = ":bell: Notification settings have been updated.\n" +
+                    $"Notifications will be announced at, {Notifications.NotificationTime}.";
             }
             await ReplyAsync(msg);
         }

@@ -103,7 +103,7 @@ namespace FantasyBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<FantasyCriticService>()
-                .AddSingleton<NotificationService>()
+                .AddSingleton<ReleasesService>()
                 .BuildServiceProvider();
         }
 

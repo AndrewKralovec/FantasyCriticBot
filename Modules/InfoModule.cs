@@ -23,8 +23,7 @@ namespace FantasyBot
         [Summary("Get the league standings")]
         public async Task StandingsAsync()
         {
-            var publishers = await Client.GetLeaguePublishers();
-            var results = publishers
+            var results = (await Client.GetLeaguePublishers())
                 .Select(pub => $"{pub.publisherName} has {pub.totalFantasyPoints} total points")
                 .ToArray();
 
