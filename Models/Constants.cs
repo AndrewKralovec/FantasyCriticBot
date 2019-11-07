@@ -10,6 +10,7 @@ namespace FantasyBot.Models
         public const string ConfigPrefix = "Bot:Prefix";
         public const string Dev = "development";
         public const string Env = "NETCORE_ENVIRONMENT";
+        public const string FantasyApi = "https://www.fantasycritic.games/api";
         public const string JsonContent = "application/json";
     }
 }

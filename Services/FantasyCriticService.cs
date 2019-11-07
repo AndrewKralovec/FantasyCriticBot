@@ -39,8 +39,8 @@ namespace FantasyBot
                     UseCookies = true,
                     CookieContainer = new CookieContainer()
                 });
-            _remoteServiceBaseUrl = new UriBuilder("https://www.fantasycritic.games/api/League/GetLeagueYear");
-            _remoteServiceLoginUrl = new UriBuilder("https://www.fantasycritic.games/api/account/login");
+            _remoteServiceBaseUrl = new UriBuilder($"{Constants.FantasyApi}/League/GetLeagueYear");
+            _remoteServiceLoginUrl = new UriBuilder($"{Constants.FantasyApi}/account/login");
         }
 
         /// <summary>
