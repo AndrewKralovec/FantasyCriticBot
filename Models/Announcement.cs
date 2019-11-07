@@ -34,20 +34,15 @@ namespace FantasyBot.Models
             _tasks.Add(taskId, timer);
         }
         /// <summary>
-        /// Upate the start and interval time of a task.
+        /// Update the start and interval time of a task. Assumes the task exists.
         /// </summary>
         /// <param name="taskId">Key used to find the task</param>
         /// <param name="dueTime">When the timer starts</param>
         /// <param name="interval">How often it runs</param>
         public virtual bool UpdateTaskTime(string taskId, TimeSpan dueTime, TimeSpan interval)
         {
-            bool updated = false;
-            if (TaskExists(taskId))
-            {
-                var task = _tasks[taskId];
-                updated = task.Change(dueTime, interval);
-            }
-            return updated;
+            var task = _tasks[taskId];
+            return task.Change(dueTime, interval);
         }
 
         public virtual bool TaskExists(string taskId)
