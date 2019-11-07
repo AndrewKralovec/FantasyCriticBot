@@ -95,9 +95,7 @@ namespace FantasyBot
         /// Returns the App's ServiceProvider that is used to call the services.
         /// </summary>
         /// <returns>The Bot ServiceProvider</returns>
-        ServiceProvider ConfigureServices()
-        {
-            return new ServiceCollection()
+        ServiceProvider ConfigureServices() => new ServiceCollection()
                 .AddSingleton(Config)
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
@@ -105,7 +103,6 @@ namespace FantasyBot
                 .AddSingleton<FantasyCriticService>()
                 .AddSingleton<ReleasesService>()
                 .BuildServiceProvider();
-        }
 
     }
 }
