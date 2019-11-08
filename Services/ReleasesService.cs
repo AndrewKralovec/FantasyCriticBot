@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.WebSocket;
@@ -80,11 +80,15 @@ namespace FantasyBot
 
         public bool ChangeNotificationTime(DateTime date, string leagueId)
         {
-            _notificationTime = date;
-            if (TaskExists(leagueId))
-                return UpdateTaskTime(leagueId, TimeOffset, _daySpan);
+            var canChange = true;
+            if (base.TaskExists(leagueId))
+                canChange = base.UpdateTaskTime(leagueId, TimeOffset(date), _daySpan);
 
-            return true;
+            // There was no task or we could update the task notification time.
+            if (canChange)
+            _notificationTime = date;
+
+            return canChange;
         }
     }
 }
