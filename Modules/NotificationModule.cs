@@ -14,14 +14,18 @@ namespace FantasyBot
         [Summary("Add a league to the Notification service")]
         public async Task Watch(string id = "")
         {
+            var nTime = Notifications.NotificationTime;
+            var msg = "Notification scheduling time not set";
             if(String.IsNullOrEmpty(id))
                 id = Client.LeagueID;
-
-            Notifications.AddNotification(id);
-            
-            var msg = $"You are now watching, {id}.\n" + 
-                "You will now receive be notified everyday of league game releases.\n" +
-                $"The next notification will be announced at, {Notifications.NotificationTime}.";
+                        
+            if (nTime != null)
+            {
+                Notifications.AddNotification(id);
+                msg = $"You are now watching, {id}.\n" +
+                    "You will now receive be notified everyday of league game releases.\n" +
+                    $"The next notification will be announced at, {Notifications.NotificationTime}.";
+            }
             await ReplyAsync(msg);
         }
 

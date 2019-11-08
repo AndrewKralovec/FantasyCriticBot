@@ -1,4 +1,4 @@
-
+﻿
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.WebSocket;
@@ -15,7 +15,7 @@ namespace FantasyBot
     {
         readonly DiscordSocketClient _client;
         readonly FantasyCriticService _criticService;
-        readonly TimeSpan _daySpan = TimeSpan.FromHours(24);
+        readonly TimeSpan _daySpan;
         DateTime _notificationTime;
         readonly string _notificationTitle;
 
@@ -30,7 +30,7 @@ namespace FantasyBot
             _client = services.GetRequiredService<DiscordSocketClient>();
             _criticService = services.GetRequiredService<FantasyCriticService>();
             _notificationTitle = "Fantasy Critic Notification";
-            _notificationTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 59);
+            _daySpan = TimeSpan.FromHours(24);
         }
 
         /// <summary>Public accessor for time when the notification will be announced. Make configurable later...</summary>
@@ -42,14 +42,14 @@ namespace FantasyBot
         }
 
         /// <summary> The time span until <c>_notificationTime</c>.</summary>
-        TimeSpan TimeOffset { get => _notificationTime - DateTime.Now; }
+        TimeSpan TimeOffset(DateTime time) => time - DateTime.Now;
 
         /// <summary>
         /// Add a task with the offset from now and when notifications will be invoke. 
         /// </summary>
         /// <param name="leagueId">Task Key</param>
         public void AddNotification(string leagueId)
-            => ScheduleTask(leagueId, ReleaseNotification, TimeOffset, _daySpan);
+            => base.ScheduleTask(leagueId, ReleaseNotification, TimeOffset(_notificationTime), _daySpan);
 
         /// <summary>
         /// (Currently) The only <c>Notification</c> task.
@@ -59,8 +59,7 @@ namespace FantasyBot
         /// <returns>Sends Message to channel</returns>
         public async void ReleaseNotification(object state)
         {
-            var games = await _criticService.GetLeagueGameReleases();
-            var releases = games
+            var releases = (await _criticService.GetLeagueGameReleases())
                 .Select(game => $"{game.GameName} will be released: {game.FormatedDate}")
                 .ToArray();
 
@@ -86,8 +85,8 @@ namespace FantasyBot
 
             // There was no task or we could update the task notification time.
             if (canChange)
-            _notificationTime = date;
-
+                _notificationTime = date;
+             
             return canChange;
         }
     }

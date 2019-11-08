@@ -15,8 +15,7 @@ namespace FantasyBot.Models
         /// <summary>
         /// The <c>Announcement</c> class constructor.
         /// </summary>
-        public Announcement()
-            => _tasks = new Dictionary<string, Timer>();
+        public Announcement() => _tasks = new Dictionary<string, Timer>();
 
         /// <summary>
         /// Initializes a new threaded timer with the requested task. The timer is Registered to <c>_tasks</c> collection.
@@ -45,7 +44,6 @@ namespace FantasyBot.Models
             return task.Change(dueTime, interval);
         }
 
-        public virtual bool TaskExists(string taskId)
-                    => _tasks.ContainsKey(taskId);
+        public virtual bool TaskExists(string taskId) => _tasks.ContainsKey(taskId);
     }
 }
